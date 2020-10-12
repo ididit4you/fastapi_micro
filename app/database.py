@@ -15,7 +15,7 @@ async def connect_redis(app: FastAPI) -> None:
 async def disconnect_redis(app: FastAPI) -> None:
     """Disconnect redis."""
     app.state.redis.close()
-    await app['redis'].wait_closed()
+    await app.state.redis.wait_closed()
 
 
 async def connect_db(app: FastAPI) -> None:
