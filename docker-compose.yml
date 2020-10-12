@@ -1,23 +1,21 @@
 version: '2.2'
 
 services:
-  migrations:
-    restart: always
-    build:
-      context: .
-      args:
-        ENV: LOCAL
-    env_file:
-      - .env
-    cpus: 2
-    mem_limit: 512m
-    ports:
-      - '8000:8000'
-    volumes:
-      - .:/src
-    depends_on: 
-      - db
-    command: "python migrate.py"
+  # migrations:
+  #   restart: always
+  #   build:
+  #     context: .
+  #     args:
+  #       ENV: LOCAL
+  #   env_file:
+  #     - .env
+  #   cpus: 1
+  #   mem_limit: 512m
+  #   volumes:
+  #     - .:/src
+  #   depends_on: 
+  #     - db
+  #   command: "python migrate.py"
 
   app:
     restart: always
@@ -30,15 +28,13 @@ services:
     cpus: 2
     mem_limit: 512m
     ports:
-      - '8000:8000'
+      - '8080:8080'
     volumes:
       - .:/src
     depends_on: 
-      updater:
-        condition: service_started
-      redis:
-        condition: service_healthy
-    command: uvicorn main:app --reload
+      - redis
+      - db
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload 
 
 
   redis:
