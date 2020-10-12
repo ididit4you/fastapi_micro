@@ -5,14 +5,14 @@ from pathlib import Path
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+path = Path().cwd()
+sys.path.insert(0, str(path))
+
+from app.models import metadata
 from app.settings import conf
 
 # Импортируем модели чтобы удостовериться что они будут в памяти db
 # Например: from calc.models import calc_meta
-
-
-path = Path().cwd()
-sys.path.insert(0, str(path))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -28,7 +28,7 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = []
+target_metadata = metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
