@@ -7,5 +7,5 @@ router = APIRouter()
 
 @router.get('/hc', name='healthcheck')
 async def healthcheck() -> Any:
-    """Тестовый view."""
+    """Healthcheck."""
     return {'message': 'OK'}
