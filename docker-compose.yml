@@ -1,21 +1,21 @@
 version: '2.2'
 
 services:
-  # migrations:
-  #   restart: always
-  #   build:
-  #     context: .
-  #     args:
-  #       ENV: LOCAL
-  #   env_file:
-  #     - .env
-  #   cpus: 1
-  #   mem_limit: 512m
-  #   volumes:
-  #     - .:/src
-  #   depends_on: 
-  #     - db
-  #   command: "python migrate.py"
+  migrations:
+    restart: 'no'
+    build:
+      context: .
+      args:
+        ENV: LOCAL
+    env_file:
+      - .env
+    cpus: 1
+    mem_limit: 512m
+    volumes:
+      - .:/src
+    depends_on: 
+      - db
+    command: "python migrate.py"
 
   app:
     restart: always
@@ -34,6 +34,7 @@ services:
     depends_on: 
       - redis
       - db
+      - migrations
     command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload 
 
 
@@ -52,9 +53,9 @@ services:
     image: postgres:12-alpine
     env_file: .env
     environment:
-      POSTGRES_DB: calc_db_robo
-      POSTGRES_PASSWORD: calc_db_robo
-      POSTGRES_USER: calc_db_robo
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
