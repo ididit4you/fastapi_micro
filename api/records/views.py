@@ -2,13 +2,13 @@ from typing import Any, List
 
 from fastapi import APIRouter, Request
 
-from api.records.shema import Record
 from api.records.models import record
+from api.records.shema import Record
 
 router = APIRouter()
 
 
-@router.get('/records/', summary='Records list', response_model=List[Record])
+@router.get('/records/', summary='Records list', name='records', response_model=List[Record])
 async def create_item(request: Request) -> Any:
     """Fetch all records."""
     db = request.app.state.db
