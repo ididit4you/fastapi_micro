@@ -1,0 +1,25 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+mypy = "*"
+pytest = "*"
+isort = "<5"
+wemake-python-styleguide = "*"
+flake8 = "*"
+
+[packages]
+fastapi = {extras = ["all"], version = "*"}
+databases = {extras = ["postgresql"], version = "*"}
+uvicorn = "*"
+pydantic = "*"
+aioredis = "*"
+orjson = "*"
+alembic = "*"
+psycopg2-binary = "*"
+sqlalchemy-utils = "*"
+
+[requires]
+python_version = "3.8"
