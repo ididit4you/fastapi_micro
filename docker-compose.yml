@@ -38,20 +38,8 @@ services:
         condition: service_started
       redis:
         condition: service_healthy
+    command: uvicorn main:app --reload
 
-  updater:
-    build:
-      context: .
-      args:
-        ENV: LOCAL
-    env_file: 
-      - .env
-    volumes:
-      - .:/src
-    command: "python update.py"
-    depends_on: 
-      - db
-      - migrations
 
   redis:
     restart: always

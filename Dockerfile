@@ -42,4 +42,4 @@ USER app
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:get_app"]
+CMD ["uvicorn", "main:app"]
