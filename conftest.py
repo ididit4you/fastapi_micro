@@ -12,19 +12,18 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 from fastapi.testclient import TestClient
 
 from app.settings import conf
-from main import get_app
+from main import app
 
 
 @pytest.fixture(scope='module')
 def cli() -> Generator:
     """Тестовый клиент."""
-    app = get_app()
     with TestClient(app) as client:
         yield client
 
 
-@pytest.fixture(scope='session', autouse=True)
-def create_test_database():
+@pytest.fixture(scope='session')
+def with_db():
     """Создаем тестовую дб."""
     conf.ENV = 'TEST'
     url = str(conf.pg_dsn)
