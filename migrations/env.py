@@ -2,10 +2,11 @@ import sys
 from logging.config import fileConfig
 from pathlib import Path
 
+from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from alembic import context
 from app.settings import conf
+
 # Импортируем модели чтобы удостовериться что они будут в памяти db
 # Например: from calc.models import calc_meta
 
