@@ -22,7 +22,7 @@ def cli() -> Generator:
         yield client
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='session', autouse=True)
 def with_db():
     """Создаем тестовую дб."""
     conf.ENV = 'TEST'
