@@ -3,7 +3,8 @@ from typing import Callable, Coroutine
 
 from fastapi import FastAPI
 
-from app.database import connect_db, connect_redis, disconnect_db, disconnect_redis
+from app.db_conn import connect_db, disconnect_db
+from app.redis_conn import connect_redis, disconnect_redis
 
 EventHandlerType = Callable[[], Coroutine[None, None, None]]
 
