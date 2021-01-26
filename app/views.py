@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Request, Response, 
+from fastapi import APIRouter, Request, Response
 
 
 router = APIRouter()

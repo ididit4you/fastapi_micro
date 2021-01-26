@@ -13,7 +13,7 @@ from main import app
 from sqlalchemy import create_engine
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
-POSTGRES_TEST_DB = str(conf.POSTGRES_URI)
+POSTGRES_TEST_DB = str(conf.postgres.POSTGRES_URI)
 
 
 @pytest.fixture(scope='module')
