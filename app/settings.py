@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, BaseSettings, HttpUrl, PostgresDsn, RedisDsn, validator
+from pydantic import BaseSettings, HttpUrl, PostgresDsn, RedisDsn, validator
 
 DEFAULT_POSTGRES_PORT = '5432'
 
