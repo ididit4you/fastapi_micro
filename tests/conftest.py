@@ -2,6 +2,7 @@
 from typing import AsyncGenerator, Generator
 
 import databases
+from databases.core import Database
 import pytest
 from alembic import command
 from alembic.config import Config
@@ -29,17 +30,17 @@ TEST_DB = PostgresDsn.build(
 
 @pytest.fixture(scope='session', autouse=True)
 def temp_db() -> Generator[None, None, None]:
-    """Создаем тестовую дб."""
+    """Create new test db for testing session."""
     create_engine(TEST_DB)
     db_exists = database_exists(TEST_DB)
     if db_exists:
         drop_database(TEST_DB)
-    create_database(TEST_DB)             # Create the test database.
-    config = Config('alembic.ini')   # Run the migrations.
+    create_database(TEST_DB)  # Create the test database.
+    config = Config('alembic.ini')  # Run the migrations.
     config.set_main_option('sqlalchemy.url', TEST_DB)
     assert config.get_main_option('sqlalchemy.url') == TEST_DB
     command.upgrade(config, 'head')
-    yield                            # Run the tests.
+    yield  # Run the tests.
     drop_database(TEST_DB)
 
 
@@ -50,12 +51,13 @@ async def db_conn() -> AsyncGenerator[databases.Database, None]:
     db = databases.Database(TEST_DB)
     await db.connect()
     yield db
-    await db.disconnect()
+    if db.is_connected:
+        await db.disconnect()
 
 
 @pytest.fixture
-def cli(db_conn):  # type: ignore
-    """Тестовый клиент."""
+def cli(db_conn: Database):  # type: ignore
+    """Test cli."""
     with TestClient(app) as client:
         client.app.state.db = db_conn
         yield client
