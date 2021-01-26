@@ -1,4 +1,4 @@
 """Collect all meta here for import in migrations.env.py."""
-from api.records.models import metadata as records_meta
+from api.calc.models import metadata as calc_meta
 
-metadata = [records_meta]
+metadata = [calc_meta]

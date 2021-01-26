@@ -1,42 +1,64 @@
 version: '2.2'
 
 services:
-  migrations:
+  tests:
     restart: 'no'
     build:
       context: .
       args:
-        ENV: LOCAL
+        ENV: TEST
     env_file:
       - .env
+    environment:
+      ENV: TEST
     cpus: 1
     mem_limit: 512m
     volumes:
-      - .:/src
+      - .:/app
     depends_on: 
-      - db
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_started
+    command: "pytest"
+
+  migrations:
+    restart: 'no'
+    build:
+      context: .
+    env_file: .env
+    cpus: 1
+    mem_limit: 512m
+    volumes:
+      - .:/app
+    depends_on: 
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     command: "python migrate.py"
 
   app:
     restart: always
     build:
       context: .
-      args:
-        ENV: LOCAL
-    env_file:
-      - .env
+    env_file: .env
     cpus: 2
     mem_limit: 512m
     ports:
-      - '8080:8080'
+      - '8000:8000'
     volumes:
-      - .:/src
+      - .:/app
     depends_on: 
-      - redis
-      - db
-      - migrations
-    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload 
-
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_started
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
 
   redis:
     restart: always
@@ -44,20 +66,21 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-        test: ["CMD", "redis-cli","ping"]
-        interval: 10s
-        timeout: 10s
-        retries: 3
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
 
   db:
     image: postgres:12-alpine
     env_file: .env
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - 5432:5432
   

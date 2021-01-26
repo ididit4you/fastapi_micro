@@ -5,20 +5,17 @@ from pathlib import Path
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+# Hack for alembic, it shod see all the module. Do not isort it!
 path = Path().cwd()
 sys.path.insert(0, str(path))
-
 from app.models import metadata
 from app.settings import conf
-
-# Импортируем модели чтобы удостовериться что они будут в памяти db
-# Например: from calc.models import calc_meta
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option('sqlalchemy.url', conf.pg_dsn)  # Set conf.pg_dsn as sqlalchemy.url in alembic.ini
+config.set_main_option('sqlalchemy.url', conf.POSTGRES_URI)  # Set conf.POSTGRES_URI as sqlalchemy.url in alembic.ini
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

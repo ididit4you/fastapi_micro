@@ -1,8 +1,9 @@
+# Api root router
+# Register routes from apps here
 from fastapi import APIRouter
 
-from api.records.views import router as records_router
+from api.calc.views import router as calc_router
 
 api_routes = APIRouter()
 
-# Records routers
-api_routes.include_router(records_router, tags=['Records'])
+api_routes.include_router(calc_router, tags=['Calc'])
