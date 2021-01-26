@@ -1,16 +1,13 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from pydantic import BaseSettings, HttpUrl, PostgresDsn, RedisDsn, validator
+from pydantic import BaseModel, BaseSettings, HttpUrl, PostgresDsn, RedisDsn, validator
 
 DEFAULT_POSTGRES_PORT = '5432'
 
 
-class Settings(BaseSettings):
-    """Настройки проекта."""
-
-    ENV: Optional[str] = None
-    BASE_DIR: Path = Path().cwd()
+class RedisSettings(BaseSettings):
+    """Setup redis."""
 
     REDIS_HOST: Optional[str] = None
     REDIS_USER: Optional[str] = None
@@ -19,11 +16,23 @@ class Settings(BaseSettings):
     REDIS_DB: Optional[str] = None
     REDIS_URI: Optional[RedisDsn] = None
 
-    SENTRY_DSN: Optional[HttpUrl] = None
-    ROOT_PATH: str = '/'
-    PROJECT_NAME: str = '*'
-    PROJECT_DESCRIPTION: str = '*'
-    PROJECT_VERSION: str = '*'
+    @validator('REDIS_URI', pre=True)
+    def build_redis_dsn(cls, redis_dsn: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
+        """Set REDIS_URI."""
+        if values.get('REDIS_HOST'):
+            return RedisDsn.build(
+                scheme='redis',
+                user=values.get('REDIS_USER'),
+                password=values.get('REDIS_PASSWORD'),
+                host=values.get('REDIS_HOST'),
+                port=values.get('REDIS_PORT'),
+                path=values.get('REDIS_DB'),
+            )
+        return None
+
+
+class DbSettings(BaseSettings):
+    """Setup database."""
 
     # POSTGRES default values need for alembic
     POSTGRES_HOST: str = 'localhost'
@@ -32,8 +41,8 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = 'postgres'
     POSTGRES_PORT: str = DEFAULT_POSTGRES_PORT
     POSTGRES_URI: Optional[PostgresDsn]
-    POSTGRES_POOL_MIN: int = 10
-    POSTGRES_POOL_MAX: int = 20
+    POSTGRES_POOL_MIN: Optional[int] = 10
+    POSTGRES_POOL_MAX: Optional[int] = 20
 
     @validator('POSTGRES_URI', pre=True)
     def build_pg_dsn(cls, val: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
@@ -52,19 +61,27 @@ class Settings(BaseSettings):
             path=db,
         )
 
-    @validator('REDIS_URI', pre=True)
-    def build_redis_dsn(cls, val: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
-        """Set REDIS_URI."""
-        if isinstance(val, str):
-            return val
-        return RedisDsn.build(
-            scheme='redis',
-            user=values.get('REDIS_USER'),
-            password=values.get('REDIS_PASSWORD'),
-            host=values.get('REDIS_HOST'),
-            port=values.get('REDIS_PORT'),
-            path=values.get('REDIS_DB'),
-        )
+
+class Settings(BaseSettings):
+    """Настройки проекта."""
+
+    ENV: Optional[str] = None
+    BASE_DIR: Path = Path().cwd()
+    SENTRY_DSN: Optional[HttpUrl] = None
+    ROOT_PATH: str = '/'
+    PROJECT_NAME: str = '*'
+    PROJECT_DESCRIPTION: str = '*'
+    PROJECT_VERSION: str = '*'
+
+    redis: RedisSettings = RedisSettings()
+    postgres: DbSettings = DbSettings()
+
+    @validator('SENTRY_DSN', pre=True)
+    def build_sentry_dsn(cls, sentry_dsn: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
+        """Set SENTRY_DSN."""
+        if sentry_dsn:
+            return HttpUrl(sentry_dsn)
+        return None
 
 
 conf = Settings()
