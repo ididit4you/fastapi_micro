@@ -1,6 +1,7 @@
+import databases
+
 from fastapi import FastAPI
 
-import databases
 from app.settings import conf
 
 
