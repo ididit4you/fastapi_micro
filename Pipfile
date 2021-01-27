@@ -11,6 +11,8 @@ isort = "<5"
 wemake-python-styleguide = "*"
 flake8 = "*"
 requests = "*"
+pytest-env = "*"
+
 
 [packages]
 fastapi = "==0.62.0"
