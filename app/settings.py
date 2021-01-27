@@ -6,57 +6,21 @@ from pydantic import BaseSettings, HttpUrl, PostgresDsn, RedisDsn, validator
 DEFAULT_POSTGRES_PORT = '5432'
 
 
-class Settings(BaseSettings):
-    """Настройки проекта."""
+class RedisSettings(BaseSettings):
+    """Setup redis."""
 
-    ENV: Optional[str] = None
-    BASE_DIR: Path = Path().cwd()
-
-    REDIS_HOST: Optional[str] = None
+    REDIS_HOST: str = 'localhost'
     REDIS_USER: Optional[str] = None
-    REDIS_PORT: Optional[str] = None
+    REDIS_PORT: str = '6379'
     REDIS_PASSWORD: Optional[str] = None
-    REDIS_DB: Optional[str] = None
+    REDIS_DB: str = '/10'
     REDIS_URI: Optional[RedisDsn] = None
 
-    SENTRY_DSN: Optional[HttpUrl] = None
-    ROOT_PATH: str = '/'
-    PROJECT_NAME: str = '*'
-    PROJECT_DESCRIPTION: str = '*'
-    PROJECT_VERSION: str = '*'
-
-    # POSTGRES default values need for alembic
-    POSTGRES_HOST: str = 'localhost'
-    POSTGRES_DB: str = 'postgres'
-    POSTGRES_USER: str = 'postgres'
-    POSTGRES_PASSWORD: str = 'postgres'
-    POSTGRES_PORT: str = DEFAULT_POSTGRES_PORT
-    POSTGRES_URI: Optional[PostgresDsn]
-    POSTGRES_POOL_MIN: int = 10
-    POSTGRES_POOL_MAX: int = 20
-
-    @validator('POSTGRES_URI', pre=True)
-    def build_pg_dsn(cls, val: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
-        """Set POSTGRES_URI."""
-        if isinstance(val, str):
-            return val
-        db = f'/{values.get("POSTGRES_DB")}'
-        if db and values.get('ENV') == 'TEST':
-            db = f'{db}_test'
-        return PostgresDsn.build(
-            scheme='postgresql',
-            user=values.get('POSTGRES_USER'),
-            password=values.get('POSTGRES_PASSWORD'),
-            host=values.get('POSTGRES_HOST'),
-            port=values.get('POSTGRES_PORT'),
-            path=db,
-        )
-
     @validator('REDIS_URI', pre=True)
-    def build_redis_dsn(cls, val: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
+    def build_redis_dsn(cls, redis_dsn: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
         """Set REDIS_URI."""
-        if isinstance(val, str):
-            return val
+        if redis_dsn:
+            return redis_dsn
         return RedisDsn.build(
             scheme='redis',
             user=values.get('REDIS_USER'),
@@ -65,6 +29,56 @@ class Settings(BaseSettings):
             port=values.get('REDIS_PORT'),
             path=values.get('REDIS_DB'),
         )
+
+
+class DbSettings(BaseSettings):
+    """Setup database."""
+
+    # POSTGRES default values need for alembic
+    POSTGRES_HOST: str = 'localhost'
+    POSTGRES_DB: str = 'postgres'
+    POSTGRES_USER: str = 'postgres'
+    POSTGRES_PASSWORD: str = 'postgres'
+    POSTGRES_PORT: str = DEFAULT_POSTGRES_PORT
+    POSTGRES_URI: Optional[PostgresDsn] = None
+    POSTGRES_POOL_MIN: int = 10
+    POSTGRES_POOL_MAX: int = 20
+
+    @validator('POSTGRES_URI', pre=True)
+    def build_pg_dsn(cls, pg_dsn: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
+        """Set POSTGRES_URI."""
+        if pg_dsn:
+            return pg_dsn
+        return PostgresDsn.build(
+            scheme='postgresql',
+            user=values.get('POSTGRES_USER'),
+            password=values.get('POSTGRES_PASSWORD'),
+            host=values.get('POSTGRES_HOST'),
+            port=values.get('POSTGRES_PORT'),
+            path='/{db}'.format(db=values.get('POSTGRES_DB')),
+        )
+
+
+class Settings(BaseSettings):
+    """Настройки проекта."""
+
+    ENV: Optional[str] = None
+    BASE_DIR: Path = Path().cwd()
+    SENTRY_DSN: Optional[HttpUrl] = None
+    ROOT_PATH: str = '/'
+    PROJECT_NAME: str = '*'
+    PROJECT_DESCRIPTION: str = '*'
+    PROJECT_VERSION: str = '*'
+
+    redis: RedisSettings = RedisSettings()
+    postgres: DbSettings = DbSettings()
+
+    @validator('SENTRY_DSN', pre=True)
+    def build_sentry_dsn(cls, sentry_dsn: Optional[str]) -> Any:  # noqa: N805
+        """Set SENTRY_DSN."""
+        if sentry_dsn:
+            return HttpUrl(sentry_dsn)
+        return None
 
 
 conf = Settings()

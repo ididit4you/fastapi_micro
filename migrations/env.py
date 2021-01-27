@@ -15,7 +15,7 @@ from app.settings import conf
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option('sqlalchemy.url', conf.POSTGRES_URI)  # Set conf.POSTGRES_URI as sqlalchemy.url in alembic.ini
+config.set_main_option('sqlalchemy.url', conf.postgres.POSTGRES_URI)  # Set conf.POSTGRES_URI as sqlalchemy.url in alembic.ini
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
