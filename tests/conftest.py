@@ -18,7 +18,7 @@ from main import app
 TEST_DB = conf.postgres.POSTGRES_URI
 assert TEST_DB.endswith('.pytest')
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def temp_db() -> Generator[None, None, None]:
     """Create new test db for testing session."""
     db_exists = database_exists(TEST_DB)
