@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     environment:
-      ENV: TEST
+      POSTGRES_DB: postgres.pytest
     cpus: 1
     mem_limit: 512m
     volumes:
