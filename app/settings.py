@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from pydantic import BaseSettings, HttpUrl, PostgresDsn, RedisDsn, validator
+from pydantic import BaseSettings, PostgresDsn, RedisDsn, validator
 
 DEFAULT_POSTGRES_PORT = '5432'
 
@@ -41,8 +41,8 @@ class DbSettings(BaseSettings):
     POSTGRES_PASSWORD: str = 'postgres'
     POSTGRES_PORT: str = DEFAULT_POSTGRES_PORT
     POSTGRES_URI: Optional[PostgresDsn] = None
-    POSTGRES_POOL_MIN: int = 10
-    POSTGRES_POOL_MAX: int = 20
+    POSTGRES_POOL_MIN: int = 1
+    POSTGRES_POOL_MAX: int = 10
 
     @validator('POSTGRES_URI', pre=True)
     def build_pg_dsn(cls, pg_dsn: Optional[str], values: Dict[str, Any]) -> Any:  # noqa: N805
@@ -62,9 +62,8 @@ class DbSettings(BaseSettings):
 class Settings(BaseSettings):
     """Настройки проекта."""
 
-    ENV: Optional[str] = None
     BASE_DIR: Path = Path().cwd()
-    SENTRY_DSN: Optional[HttpUrl] = None
+    SENTRY_DSN: Optional[str] = None
     ROOT_PATH: str = '/'
     PROJECT_NAME: str = '*'
     PROJECT_DESCRIPTION: str = '*'
@@ -72,13 +71,6 @@ class Settings(BaseSettings):
 
     redis: RedisSettings = RedisSettings()
     postgres: DbSettings = DbSettings()
-
-    @validator('SENTRY_DSN', pre=True)
-    def build_sentry_dsn(cls, sentry_dsn: Optional[str]) -> Any:  # noqa: N805
-        """Set SENTRY_DSN."""
-        if sentry_dsn:
-            return HttpUrl(sentry_dsn)
-        return None
 
 
 conf = Settings()
