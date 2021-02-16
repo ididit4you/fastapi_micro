@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from app.settings import conf
 from main import app
 
-TEST_DB = conf.postgres.POSTGRES_URI
+TEST_DB = str(conf.postgres.POSTGRES_URI)
 
 
 @pytest.fixture(autouse=True, scope='session')
